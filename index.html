@@ -3,42 +3,72 @@
 <head>
   <meta charset="UTF-8">
   <title>LOPZAEN Streetwear</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-  <header>
-    <div class="logo">
-      <a href="index.html">
-        <img src="img/logo.png" alt="LOPZAEN" />
-      </a>
-    </div>
-    <nav>
-      <a href="#">Inicio</a>
+  <header class="site-header">
+    <div class="logo"><a href="index.html"><img src="img/logo.png" alt="LOPZAEN"></a></div>
+    <nav class="nav-menu">
+      <a href="#hero">Inicio</a>
       <a href="#productos">Productos</a>
       <a href="#contacto">Contacto</a>
     </nav>
   </header>
 
-  <section class="hero">
-    <h1>Bienvenido a LOPZAEN</h1>
-    <p>Tu estilo, nuestra inspiración</p>
+  <section id="hero" class="hero">
+    <h1 class="hero-title">LOPZAEN STREETWEAR</h1>
+    <p class="hero-subtitle">Tu estilo urbano, elevado al siguiente nivel</p>
   </section>
 
-  <section id="productos" class="products">
-    <article class="product-card">
-      <img src="img/gorra.jpg" alt="Gorra LOPZAEN">
-      <div class="info">
-        <h3>Gorra “Barrio”</h3>
-        <span>$499 MXN</span>
-      </div>
-    </article>
-    <!-- Agrega más tarjetas aquí -->
+  <section id="productos" class="products-grid">
+    <!-- Las tarjetas se inyectan aquí -->
   </section>
 
-  <footer id="contacto">
-    © 2025 LOPZAEN • Hecho con orgullo en Monterrey
+  <footer id="contacto" class="site-footer">
+    <p>© 2025 LOPZAEN • Hecho con orgullo en Monterrey</p>
   </footer>
+
+  <script>
+    const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPMdIW5Pwhc2YbQ7-_wyQ8TOXaMKD4w-k3MgV2gfAkG0GGdvkOQv_NOSYZZeY-WD7tA_sAfJ_-dlDS/pub?gid=0&single=true&output=csv';
+
+    async function fetchCSV(url) {
+      const res = await fetch(url);
+      const text = await res.text();
+      const [header, ...lines] = text.trim().split('\n');
+      const keys = header.split(',').map(h => h.trim());
+      return lines.map(line => {
+        const values = line.split(',').map(v => v.trim());
+        return keys.reduce((obj, k, i) => (obj[k]=values[i]||'', obj), {});
+      });
+    }
+
+    function createCard(p) {
+      const wrap = document.createElement('article');
+      wrap.className = 'product-card';
+      wrap.innerHTML = `
+        <div class="card-img"><img src="${p.imagen}" alt="${p.nombre}"></div>
+        <div class="card-info">
+          <h3 class="card-name">${p.nombre}</h3>
+          <p class="card-desc">${p.descripcion}</p>
+          <div class="price-row">
+            <span class="old-price">$${parseFloat(p['precio publico']).toFixed(2)} MXN</span>
+            <span class="discount">-${p.descuentos}</span>
+          </div>
+          <div class="new-price">$${parseFloat(p.precioFinal || p['precio']).toFixed(2)} MXN</div>
+        </div>`;
+      return wrap;
+    }
+
+    async function loadProducts() {
+      const data = await fetchCSV(CSV_URL);
+      const grid = document.querySelector('.products-grid');
+      data.forEach(p => grid.appendChild(createCard(p)));
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProducts);
+  </script>
 
 </body>
 </html>
