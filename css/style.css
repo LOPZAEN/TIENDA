@@ -21,10 +21,16 @@ body { font-family: 'Poppins', sans-serif; background: #111; color: #eee; }
 }
 .hero-title {
   font-size: 3rem; letter-spacing: .2rem; text-transform: uppercase;
-  background: linear-gradient(90deg,#ff0055,#ffdd00); 
+  background: linear-gradient(90deg,#ff0055,#ffdd00);
   -webkit-background-clip: text; color: transparent;
 }
 .hero-subtitle { margin-top: 1rem; font-size: 1.2rem; opacity: .8; }
+
+/* CARGANDO / ERROR */
+.loading, .error {
+  grid-column: 1/-1; text-align: center; padding: 2rem;
+  color: #888;
+}
 
 /* GRID */
 .products-grid {
@@ -42,12 +48,19 @@ body { font-family: 'Poppins', sans-serif; background: #111; color: #eee; }
 }
 .card-name { font-size: 1.2rem; text-transform: uppercase; }
 .card-desc { font-size: .9rem; opacity: .7; flex-grow: 1; }
-.price-row { display: flex; align-items: baseline; gap: .5rem; }
+
+/* PRECIOS */
+.price-row {
+  display: flex; align-items: baseline; gap: .5rem; margin-top: .5rem;
+}
 .old-price {
   text-decoration: line-through; opacity: .6; font-size: .9rem;
 }
 .discount { color: #ff0055; font-weight: 700; }
-.new-price { font-size: 1.3rem; font-weight: 700; color: #ffdd00; }
+.new-price {
+  font-size: 1.3rem; font-weight: 700; color: #ffdd00;
+  margin-top: .3rem;
+}
 
 /* FOOTER */
 .site-footer {

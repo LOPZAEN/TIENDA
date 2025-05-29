@@ -3,19 +3,15 @@
 <head>
   <meta charset="UTF-8">
   <title>LOPZAEN Streetwear</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Papa Parse para CSV robusto -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Papa Parse -->
   <script src="https://cdn.jsdelivr.net/npm/papaparse@5.3.2/papaparse.min.js"></script>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
   <header class="site-header">
-    <div class="logo">
-      <a href="index.html">
-        <img src="img/logo.png" alt="LOPZAEN">
-      </a>
-    </div>
+    <div class="logo"><a href="index.html"><img src="img/logo.png" alt="LOPZAEN"></a></div>
     <nav class="nav-menu">
       <a href="#hero">Inicio</a>
       <a href="#productos">Productos</a>
@@ -29,7 +25,7 @@
   </section>
 
   <section id="productos" class="products-grid">
-    <!-- Las tarjetas se inyectan aquí -->
+    <p class="loading">Cargando productos…</p>
   </section>
 
   <footer id="contacto" class="site-footer">
@@ -39,8 +35,18 @@
   <script>
     const CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTPMdIW5Pwhc2YbQ7-_wyQ8TOXaMKD4w-k3MgV2gfAkG0GGdvkOQv_NOSYZZeY-WD7tA_sAfJ_-dlDS/pub?gid=0&single=true&output=csv';
 
-    // Crea la tarjeta HTML para cada producto
+    function formatPrice(val) {
+      return val.toLocaleString('es-MX', { style: 'currency', currency: 'MXN', minimumFractionDigits: 2 });
+    }
+
     function createCard(p) {
+      // arregla espacios en nombre de campo
+      const precioPublico = parseFloat(p['precio publico'] || p['precio_publico'] || 0);
+      const precioFinal   = parseFloat(p['precio final']  || p.precioFinal      || precioPublico);
+
+      const discountText = p.descuentos || '';
+      const hasDiscount  = discountText && discountText !== '0%';
+
       const card = document.createElement('article');
       card.className = 'product-card';
       card.innerHTML = `
@@ -51,32 +57,33 @@
           <h3 class="card-name">${p.nombre}</h3>
           <p class="card-desc">${p.descripcion}</p>
           <div class="price-row">
-            <span class="old-price">$${parseFloat(p['precio publico']).toFixed(2)} MXN</span>
-            <span class="discount">-${p.descuentos}</span>
+            ${hasDiscount
+              ? `<span class="old-price">${formatPrice(precioPublico)}</span>
+                 <span class="discount">${discountText}</span>`
+              : `<span class="new-price">${formatPrice(precioPublico)}</span>`}
           </div>
-          <div class="new-price">$${parseFloat(p.precioFinal).toFixed(2)} MXN</div>
+          ${hasDiscount
+            ? `<div class="new-price">${formatPrice(precioFinal)}</div>`
+            : ''}
         </div>`;
       return card;
     }
 
-    // Carga productos desde el CSV usando Papa Parse
     function loadProducts() {
       Papa.parse(CSV_URL, {
         download: true,
         header: true,
         skipEmptyLines: true,
-        complete: function(results) {
-          const data = results.data;
+        complete: function(res) {
           const grid = document.querySelector('.products-grid');
-          data.forEach(p => {
-            // Solo productos con nombre válido
-            if (p.nombre) {
-              grid.appendChild(createCard(p));
-            }
+          grid.innerHTML = '';  // limpia el "Cargando..."
+          res.data.forEach(p => {
+            if (p.nombre) grid.appendChild(createCard(p));
           });
         },
         error: function(err) {
-          console.error('Error al parsear CSV:', err);
+          document.querySelector('.products-grid').innerHTML = '<p class="error">Error cargando productos.</p>';
+          console.error(err);
         }
       });
     }
